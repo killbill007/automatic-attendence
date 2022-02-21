@@ -1,0 +1,394 @@
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "id": "1rRo8oNqZ-Rj",
+        "outputId": "b30454ce-96eb-4e84-f775-26f625f57b04",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.7/dist-packages/statsmodels/tools/_testing.py:19: FutureWarning: pandas.util.testing is deprecated. Use the functions in the public API at pandas.testing instead.\n",
+            "  import pandas.util.testing as tm\n"
+          ]
+        }
+      ],
+      "source": [
+        "import matplotlib.pyplot as plt\n",
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "import seaborn as sns\n",
+        "\n",
+        "import math\n",
+        "import matplotlib.pyplot as plt\n",
+        "import numpy as np\n",
+        "from numpy.random import seed\n",
+        "seed(1)\n",
+        "import pandas as pd\n",
+        "import statsmodels.api as sm\n",
+        "import statsmodels.formula.api as smf\n",
+        "import tensorflow\n",
+        "tensorflow.random.set_seed(1)\n",
+        "from tensorflow.python.keras.layers import Dense\n",
+        "from tensorflow.keras.layers import Dropout\n",
+        "from tensorflow.python.keras.models import Sequential\n",
+        "from tensorflow.python.keras.wrappers.scikit_learn import KerasRegressor\n",
+        "from sklearn.metrics import mean_absolute_error\n",
+        "from sklearn.metrics import mean_squared_error\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.preprocessing import MinMaxScaler"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 2,
+      "metadata": {
+        "id": "CiX2FI4gZtTt"
+      },
+      "outputs": [],
+      "source": [
+        "url = 'https://drive.google.com/u/0/uc?id=1OXB-kDTdXmwpARjfEKAD8pl_GG0Pz0W7&export=download'\n",
+        "column_names = [ 'Total_Costs','Facility_Name_Code', 'Age_Group_Code', 'Gender_Code', 'LengthStay', 'Type_of_Admission_Code', 'Procedure_Code', 'APR_MDC_Codes','Illness_Code','Risk_of_Mortality_Code', 'Surgical_Desc_Code','Payment_Typology1_Code']\n",
+        "\n",
+        "raw_dataset = pd.read_csv(url,  header=0)\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 3,
+      "metadata": {
+        "id": "2oY3pMPagJrO",
+        "outputId": "8efa4698-ee7f-46e9-a9af-fa76efeb9e28",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 270
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "\n",
+              "  <div id=\"df-8a3a0868-3ed8-4892-ba85-1fb44bccdda9\">\n",
+              "    <div class=\"colab-df-container\">\n",
+              "      <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Total_Costs</th>\n",
+              "      <th>Facility_Name_Code</th>\n",
+              "      <th>Age_Group_Code</th>\n",
+              "      <th>Gender_Code</th>\n",
+              "      <th>LengthStay</th>\n",
+              "      <th>Type_of_Admission_Code</th>\n",
+              "      <th>Procedure_Code</th>\n",
+              "      <th>APR_MDC_Codes</th>\n",
+              "      <th>Illness_Code</th>\n",
+              "      <th>Risk_of_Mortality_Code</th>\n",
+              "      <th>Surgical_Desc_Code</th>\n",
+              "      <th>Payment_Typology1_Code</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>1048570</th>\n",
+              "      <td>5377.33</td>\n",
+              "      <td>113</td>\n",
+              "      <td>3</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>1</td>\n",
+              "      <td>220</td>\n",
+              "      <td>8</td>\n",
+              "      <td>3</td>\n",
+              "      <td>2</td>\n",
+              "      <td>0</td>\n",
+              "      <td>7</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1048571</th>\n",
+              "      <td>7100.57</td>\n",
+              "      <td>113</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>32</td>\n",
+              "      <td>1</td>\n",
+              "      <td>65</td>\n",
+              "      <td>23</td>\n",
+              "      <td>2</td>\n",
+              "      <td>2</td>\n",
+              "      <td>0</td>\n",
+              "      <td>4</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1048572</th>\n",
+              "      <td>2748.33</td>\n",
+              "      <td>113</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>1</td>\n",
+              "      <td>120</td>\n",
+              "      <td>3</td>\n",
+              "      <td>3</td>\n",
+              "      <td>3</td>\n",
+              "      <td>0</td>\n",
+              "      <td>4</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1048573</th>\n",
+              "      <td>4639.19</td>\n",
+              "      <td>113</td>\n",
+              "      <td>4</td>\n",
+              "      <td>0</td>\n",
+              "      <td>32</td>\n",
+              "      <td>1</td>\n",
+              "      <td>181</td>\n",
+              "      <td>17</td>\n",
+              "      <td>3</td>\n",
+              "      <td>3</td>\n",
+              "      <td>0</td>\n",
+              "      <td>4</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1048574</th>\n",
+              "      <td>7144.78</td>\n",
+              "      <td>113</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>32</td>\n",
+              "      <td>1</td>\n",
+              "      <td>161</td>\n",
+              "      <td>23</td>\n",
+              "      <td>2</td>\n",
+              "      <td>2</td>\n",
+              "      <td>0</td>\n",
+              "      <td>4</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>\n",
+              "      <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-8a3a0868-3ed8-4892-ba85-1fb44bccdda9')\"\n",
+              "              title=\"Convert this dataframe to an interactive table.\"\n",
+              "              style=\"display:none;\">\n",
+              "        \n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "       width=\"24px\">\n",
+              "    <path d=\"M0 0h24v24H0V0z\" fill=\"none\"/>\n",
+              "    <path d=\"M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z\"/><path d=\"M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z\"/>\n",
+              "  </svg>\n",
+              "      </button>\n",
+              "      \n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      flex-wrap:wrap;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "      <script>\n",
+              "        const buttonEl =\n",
+              "          document.querySelector('#df-8a3a0868-3ed8-4892-ba85-1fb44bccdda9 button.colab-df-convert');\n",
+              "        buttonEl.style.display =\n",
+              "          google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "        async function convertToInteractive(key) {\n",
+              "          const element = document.querySelector('#df-8a3a0868-3ed8-4892-ba85-1fb44bccdda9');\n",
+              "          const dataTable =\n",
+              "            await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                     [key], {});\n",
+              "          if (!dataTable) return;\n",
+              "\n",
+              "          const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "            '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "            + ' to learn more about interactive tables.';\n",
+              "          element.innerHTML = '';\n",
+              "          dataTable['output_type'] = 'display_data';\n",
+              "          await google.colab.output.renderOutput(dataTable, element);\n",
+              "          const docLink = document.createElement('div');\n",
+              "          docLink.innerHTML = docLinkHtml;\n",
+              "          element.appendChild(docLink);\n",
+              "        }\n",
+              "      </script>\n",
+              "    </div>\n",
+              "  </div>\n",
+              "  "
+            ],
+            "text/plain": [
+              "         Total_Costs  ...  Payment_Typology1_Code\n",
+              "1048570      5377.33  ...                       7\n",
+              "1048571      7100.57  ...                       4\n",
+              "1048572      2748.33  ...                       4\n",
+              "1048573      4639.19  ...                       4\n",
+              "1048574      7144.78  ...                       4\n",
+              "\n",
+              "[5 rows x 12 columns]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 3
+        }
+      ],
+      "source": [
+        "dataset = raw_dataset\n",
+        "dataset.tail()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "x_train = dataset.drop(columns=['Total_Costs'])\n",
+        "y_train = dataset['Total_Costs']"
+      ],
+      "metadata": {
+        "id": "jPQIPF-JmorS"
+      },
+      "execution_count": 4,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "model = Sequential()\n",
+        "model.add(Dense(2760, input_dim=11, kernel_initializer='normal', activation='relu'))\n",
+        "model.add(Dense(1000, activation='relu'))\n",
+        "model.add(Dense(500, activation='linear'))\n",
+        "model.add(Dense(1))\n",
+        "model.summary()"
+      ],
+      "metadata": {
+        "id": "G-sjRlyDN_ql",
+        "outputId": "66436a2b-ffce-477d-8e25-43502aa251d6",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Model: \"sequential\"\n",
+            "_________________________________________________________________\n",
+            "Layer (type)                 Output Shape              Param #   \n",
+            "=================================================================\n",
+            "dense (Dense)                (None, 2760)              33120     \n",
+            "_________________________________________________________________\n",
+            "dense_1 (Dense)              (None, 1000)              2761000   \n",
+            "_________________________________________________________________\n",
+            "dense_2 (Dense)              (None, 500)               500500    \n",
+            "_________________________________________________________________\n",
+            "dense_3 (Dense)              (None, 1)                 501       \n",
+            "=================================================================\n",
+            "Total params: 3,295,121\n",
+            "Trainable params: 3,295,121\n",
+            "Non-trainable params: 0\n",
+            "_________________________________________________________________\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "model.compile(optimizer='adam', loss='mean_squared_error',metrics=['mean_squared_error'])\n",
+        "\n",
+        "# define some training data (xs as inputs and ys as outputs)\n",
+        "xs = x_train\n",
+        "ys = y_train\n",
+        "\n",
+        "# fit the model to the data (aka train the model)\n",
+        "model.fit(xs, ys, epochs=10)"
+      ],
+      "metadata": {
+        "id": "BCUhYZVeS-zy",
+        "outputId": "25f5f8f3-d4ae-40dc-dab7-745658977a5b",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/10\n",
+            "32768/32768 [==============================] - 98s 3ms/step - loss: 1613533824.0000 - mean_squared_error: 1613533824.0000\n",
+            "Epoch 2/10\n",
+            " 4332/32768 [==>...........................] - ETA: 1:18 - loss: 1604427136.0000 - mean_squared_error: 1604427136.0000"
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "colab": {
+      "collapsed_sections": [],
+      "name": "regression.ipynb",
+      "toc_visible": true,
+      "provenance": []
+    },
+    "kernelspec": {
+      "display_name": "Python 3",
+      "name": "python3"
+    },
+    "accelerator": "GPU"
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
